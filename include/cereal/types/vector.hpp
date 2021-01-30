@@ -41,6 +41,7 @@ namespace cereal
                           && std::is_arithmetic<T>::value && !std::is_same<T, bool>::value, void>::type
   CEREAL_SAVE_FUNCTION_NAME( Archive & ar, std::vector<T, A> const & vector )
   {
+      std::cout << "cereal/types/vector.hpp:CEREAL_SAVE_FUNCTION_NAME(" << TYPENAME(ar) << ", " << TYPENAME(vector) << ")" << std::endl;
     ar( make_size_tag( static_cast<size_type>(vector.size()) ) ); // number of elements
     ar( binary_data( vector.data(), vector.size() * sizeof(T) ) );
   }
@@ -51,6 +52,7 @@ namespace cereal
                           && std::is_arithmetic<T>::value && !std::is_same<T, bool>::value, void>::type
   CEREAL_LOAD_FUNCTION_NAME( Archive & ar, std::vector<T, A> & vector )
   {
+      std::cout << "cereal/types/vector.hpp:CEREAL_LOAD_FUNCTION_NAME(" << TYPENAME(ar) << ", " << TYPENAME(vector) << ")" << std::endl;
     size_type vectorSize;
     ar( make_size_tag( vectorSize ) );
 
@@ -64,6 +66,8 @@ namespace cereal
                           || !std::is_arithmetic<T>::value) && !std::is_same<T, bool>::value, void>::type
   CEREAL_SAVE_FUNCTION_NAME( Archive & ar, std::vector<T, A> const & vector )
   {
+      // This is xvector's save function.
+      std::cout << "cereal/types/vector.hpp:(nonarithmetic)CEREAL_SAVE_FUNCTION_NAME(" << TYPENAME(ar) << ", " << TYPENAME(vector) << ")" << std::endl;
     ar( make_size_tag( static_cast<size_type>(vector.size()) ) ); // number of elements
     for(auto && v : vector)
       ar( v );
@@ -87,6 +91,7 @@ namespace cereal
   template <class Archive, class A> inline
   void CEREAL_SAVE_FUNCTION_NAME( Archive & ar, std::vector<bool, A> const & vector )
   {
+      std::cout << "cereal/types/vector.hpp:CEREAL_SAVE_FUNCTION_NAME(" << TYPENAME(ar) << ", " << TYPENAME(vector) << ")" << std::endl;
     ar( make_size_tag( static_cast<size_type>(vector.size()) ) ); // number of elements
     for(const auto v : vector)
       ar( static_cast<bool>(v) );

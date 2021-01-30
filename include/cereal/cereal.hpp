@@ -39,6 +39,9 @@
 #include <cstddef>
 #include <cstdint>
 #include <functional>
+#include<boost/type_index.hpp>
+using boost::typeindex::type_id_with_cvr;
+#define TYPENAME(t) type_id_with_cvr<decltype(t)>().pretty_name()
 
 #include "cereal/macros.hpp"
 #include "cereal/details/traits.hpp"
@@ -308,6 +311,7 @@ namespace cereal
       template <class ... Types> inline
       ArchiveType & operator()( Types && ... args )
       {
+        std::cout << "cereal/cereal.hpp:OutputArchive<" << TYPENAME(*self) << ">::operator() called" << std::endl;
         self->process( std::forward<Types>( args )... );
         return *self;
       }
@@ -414,6 +418,7 @@ namespace cereal
       void process( T && head )
       {
         prologue( *self, head );
+        std::cout << "cereal/cereal.hpp:process(" << TYPENAME(head) << ") called" << std::endl;
         self->processImpl( head );
         epilogue( *self, head );
       }
@@ -422,6 +427,7 @@ namespace cereal
       template <class T, class ... Other> inline
       void process( T && head, Other && ... tail )
       {
+        std::cout << "cereal/cereal.hpp:process(" << TYPENAME(head) << ", Other) called" << std::endl;
         self->process( std::forward<T>( head ) );
         self->process( std::forward<Other>( tail )... );
       }
@@ -431,6 +437,7 @@ namespace cereal
       template <class T> inline
       ArchiveType & processImpl(virtual_base_class<T> const & b)
       {
+        std::cout << "cereal/cereal.hpp:processImpl(" << TYPENAME(b) << ") called" << std::endl;
         traits::detail::base_class_id id(b.base_ptr);
         if(itsBaseClassSet.count(id) == 0)
         {
@@ -445,6 +452,7 @@ namespace cereal
       template <class T> inline
       ArchiveType & processImpl(base_class<T> const & b)
       {
+        std::cout << "cereal/cereal.hpp:processImpl(" << TYPENAME(b) << ") called" << std::endl;
         self->processImpl( *b.base_ptr );
         return *self;
       }
@@ -478,6 +486,7 @@ namespace cereal
       template <class T, PROCESS_IF(member_serialize)> inline
       ArchiveType & processImpl(T const & t)
       {
+        std::cout << "cereal/cereal.hpp:processImpl(" << TYPENAME(t) << ") [Member serialization] called" << std::endl;
         access::member_serialize(*self, const_cast<T &>(t));
         return *self;
       }
@@ -486,6 +495,7 @@ namespace cereal
       template <class T, PROCESS_IF(non_member_serialize)> inline
       ArchiveType & processImpl(T const & t)
       {
+        std::cout << "cereal/cereal.hpp:processImpl(" << TYPENAME(t) << ") [non member serialization] called" << std::endl;
         CEREAL_SERIALIZE_FUNCTION_NAME(*self, const_cast<T &>(t));
         return *self;
       }
@@ -494,6 +504,7 @@ namespace cereal
       template <class T, PROCESS_IF(member_save)> inline
       ArchiveType & processImpl(T const & t)
       {
+        std::cout << "cereal/cereal.hpp:processImpl(" << TYPENAME(t) << ") [member split] called" << std::endl;
         access::member_save(*self, t);
         return *self;
       }
@@ -502,6 +513,9 @@ namespace cereal
       template <class T, PROCESS_IF(non_member_save)> inline
       ArchiveType & processImpl(T const & t)
       {
+          // This is where xvector goes
+        std::cout << "cereal/cereal.hpp:processImpl(" << TYPENAME(t) << ") [non member split] called" << std::endl;
+        std::cout << "cereal/cereal.hpp:calling save(" << TYPENAME(*self) << ", " << TYPENAME(t) << ") [non member split] called" << std::endl;
         CEREAL_SAVE_FUNCTION_NAME(*self, t);
         return *self;
       }
@@ -510,6 +524,7 @@ namespace cereal
       template <class T, PROCESS_IF(member_save_minimal)> inline
       ArchiveType & processImpl(T const & t)
       {
+        std::cout << "cereal/cereal.hpp:processImpl(" << TYPENAME(t) << ") [member split save_minimal] called" << std::endl;
         self->process( access::member_save_minimal(*self, t) );
         return *self;
       }
@@ -518,6 +533,7 @@ namespace cereal
       template <class T, PROCESS_IF(non_member_save_minimal)> inline
       ArchiveType & processImpl(T const & t)
       {
+        std::cout << "cereal/cereal.hpp:processImpl(" << TYPENAME(t) << ") [non member split save_minimal] called" << std::endl;
         self->process( CEREAL_SAVE_MINIMAL_FUNCTION_NAME(*self, t) );
         return *self;
       }
